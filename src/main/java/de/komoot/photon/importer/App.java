@@ -26,7 +26,7 @@ import static spark.Spark.*;
 
 @Slf4j
 public class App {
-	private static final Set<String> supportedLanguages = ImmutableSet.of("de", "en", "fr", "it");
+	private static final Set<String> supportedLanguages = ImmutableSet.of("de", "en", "fr", "it", "ru");
 
 	public static void main(String[] rawArgs) {
 		// parse command line arguments
@@ -60,7 +60,7 @@ public class App {
 			}
 		}
 
-		final Server esServer = new Server(args.getDataDirectory());
+		final Server esServer = new Server(args);
 		esServer.start();
 
 		Client esNodeClient = esServer.getClient();

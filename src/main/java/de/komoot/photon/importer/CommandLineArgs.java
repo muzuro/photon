@@ -46,5 +46,8 @@ public class CommandLineArgs {
 
 	@Parameter(names = "-h", description = "show help / usage")
 	private boolean usage = false;
+	
+	@Parameter(names = "-local", description = "is elastic search in local mode")
+        private boolean local = true;
 }
 

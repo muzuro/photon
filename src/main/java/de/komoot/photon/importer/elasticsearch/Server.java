@@ -1,6 +1,7 @@
 package de.komoot.photon.importer.elasticsearch;
 
 import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.io.IOUtils;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexResponse;
 import org.elasticsearch.client.Client;
@@ -12,6 +13,8 @@ import org.elasticsearch.indices.IndexMissingException;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.elasticsearch.plugins.PluginManager;
+
+import de.komoot.photon.importer.CommandLineArgs;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,10 +40,12 @@ public class Server {
 	private File updateDirectory;
 	private File tempDirectory;
 	private File importDirectory;
+	private CommandLineArgs args;
 
-	public Server(String mainDirectory) {
-		try {
-			setupDirectories(new URL("file://" + mainDirectory));
+	public Server(CommandLineArgs aArgs) {
+		args = aArgs;
+        try {
+			setupDirectories(new URL("file://" + aArgs.getDataDirectory()));
 		} catch(MalformedURLException e) {
 			log.error("Can´t create directories");
 		}
@@ -82,7 +87,7 @@ public class Server {
 		NodeBuilder nBuilder = nodeBuilder().clusterName(Server.clusterName).loadConfigSettings(true).
 				settings(settings);
 
-		esNode = nBuilder.node();
+		esNode = nBuilder.local(args.isLocal()).node();
 		log.info("started elastic search node");
 		return this;
 	}
