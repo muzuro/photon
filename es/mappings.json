@@ -81,6 +81,13 @@
             "copy_to": [
               "collector.it"
             ]
+          },
+          "ru": {
+            "type": "string",
+            "index": "no",
+            "copy_to": [
+              "collector.ru"
+            ]
           }
         }
       },
@@ -121,6 +128,13 @@
             "copy_to": [
               "collector.it"
             ]
+          },
+          "ru": {
+            "type": "string",
+            "index": "no",
+            "copy_to": [
+              "collector.ru"
+            ]
           }
         }
       },
@@ -159,6 +173,13 @@
             "index": "no",
             "copy_to": [
               "collector.it"
+            ]
+          },
+          "ru": {
+            "type": "string",
+            "index": "no",
+            "copy_to": [
+              "collector.ru"
             ]
           }
         }
@@ -296,6 +317,23 @@
             "copy_to": [
               "collector.it"
             ]
+          },
+          "ru": {
+            "type": "string",
+            "index": "no",
+            "fields": {
+              "ngrams": {
+                "type": "string",
+                "index_analyzer": "index_ngram"
+              },
+              "raw": {
+                "type": "string",
+                "index_analyzer": "index_raw"
+              }
+            },
+            "copy_to": [
+              "collector.ru"
+            ]
           }
         }
       },
@@ -335,6 +373,13 @@
             "type": "string",
             "copy_to": [
               "collector.it"
+            ]
+          },
+          "ru": {
+            "index": "no",
+            "type": "string",
+            "copy_to": [
+              "collector.ru"
             ]
           }
         }
@@ -383,6 +428,16 @@
             }
           },
           "it": {
+            "type": "string",
+            "analyzer": "index_ngram",
+            "fields": {
+              "raw": {
+                "type": "string",
+                "analyzer": "index_raw"
+              }
+            }
+          },
+          "ru": {
             "type": "string",
             "analyzer": "index_ngram",
             "fields": {
