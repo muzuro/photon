@@ -1,11 +1,11 @@
 package de.komoot.photon.importer.elasticsearch;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import de.komoot.photon.importer.Tags;
-import de.komoot.photon.importer.osm.OSMTags;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.text.StrSubstitutor;
@@ -17,9 +17,12 @@ import org.elasticsearch.search.SearchHit;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
+import de.komoot.photon.importer.Tags;
+import de.komoot.photon.importer.osm.OSMTags;
 
 /**
  * date: 24.05.14
@@ -64,7 +67,8 @@ public class Searcher {
 			query = sub.replace(queryTemplate);
 		}
 
-		SearchResponse response = client.prepareSearch("photon").setSearchType(SearchType.QUERY_AND_FETCH).setQuery(query).setSize(limit).setTimeout(TimeValue.timeValueSeconds(7)).execute().actionGet();
+		SearchResponse response = client.prepareSearch("photon").setSearchType(SearchType.QUERY_THEN_FETCH)
+		        .setQuery(query).setSize(limit).setTimeout(TimeValue.timeValueSeconds(7)).execute().actionGet();
 		List<JSONObject> results = convert(response.getHits().getHits(), lang);
 		results = removeStreetDuplicates(results);
 		return results;
@@ -72,23 +76,17 @@ public class Searcher {
 
 	private List<JSONObject> removeStreetDuplicates(List<JSONObject> results) {
 		List<JSONObject> filteredItems = Lists.newArrayListWithCapacity(results.size());
-		final HashSet<String> keys = Sets.newHashSet();
+		final HashSet<StreetKey> keys = Sets.newHashSet();
 		for(JSONObject result : results) {
 			final JSONObject properties = result.getJSONObject(Tags.KEY_PROPERTIES);
 			if(properties.has(Tags.KEY_OSM_KEY) && "highway".equals(properties.getString(Tags.KEY_OSM_KEY))) {
 				// result is a street
-				if(properties.has(OSMTags.KEY_POSTCODE) && properties.has(OSMTags.KEY_NAME)) {
-					// street has a postcode and name
-					String postcode = properties.getString(OSMTags.KEY_POSTCODE);
-					String name = properties.getString(OSMTags.KEY_NAME);
-					String key = postcode + ":" + name;
-
-					if(keys.contains(key)) {
-						// a street with this name + postcode is already part of the result list
-						continue;
-					}
-					keys.add(key);
+			        StreetKey streetKey = new StreetKey(properties);
+				if(keys.contains(streetKey)) {
+				    // a street with keys is already part of the result list
+				    continue;
 				}
+				keys.add(streetKey);
 			}
 			filteredItems.add(result);
 		}
@@ -147,5 +145,51 @@ public class Searcher {
 		}
 
 		return map.get("default");
+	}
+	
+	public static class StreetKey {
+	    private final String name;
+	    private final String city;
+	    private final String street;
+	    public StreetKey(JSONObject aStreetJson) {
+	        name = aStreetJson.has(OSMTags.KEY_NAME) ? aStreetJson.getString(OSMTags.KEY_NAME) : null;
+	        city = aStreetJson.has(OSMTags.KEY_CITY) ? aStreetJson.getString(OSMTags.KEY_CITY) : null;
+	        street = aStreetJson.has(OSMTags.KEY_STREET) ? aStreetJson.getString(OSMTags.KEY_STREET) : null;
+            }
+            @Override
+            public int hashCode() {
+                final int prime = 31;
+                int result = 1;
+                result = prime * result + ((city == null) ? 0 : city.hashCode());
+                result = prime * result + ((name == null) ? 0 : name.hashCode());
+                result = prime * result + ((street == null) ? 0 : street.hashCode());
+                return result;
+            }
+            @Override
+            public boolean equals(Object obj) {
+                if (this == obj)
+                    return true;
+                if (obj == null)
+                    return false;
+                if (getClass() != obj.getClass())
+                    return false;
+                StreetKey other = (StreetKey) obj;
+                if (city == null) {
+                    if (other.city != null)
+                        return false;
+                } else if (!city.equals(other.city))
+                    return false;
+                if (name == null) {
+                    if (other.name != null)
+                        return false;
+                } else if (!name.equals(other.name))
+                    return false;
+                if (street == null) {
+                    if (other.street != null)
+                        return false;
+                } else if (!street.equals(other.street))
+                    return false;
+                return true;
+            }
 	}
 }

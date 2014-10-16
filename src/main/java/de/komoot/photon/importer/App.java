@@ -139,10 +139,10 @@ public class App {
 				}
 
 				List<JSONObject> results = searcher.search(query, lang, lon, lat, limit, true);
-				if(results.isEmpty()) {
-					// try again, but less restrictive
-					results = searcher.search(query, lang, lon, lat, limit, false);
-				}
+//				if(results.isEmpty()) {
+//					// try again, but less restrictive
+//					results = searcher.search(query, lang, lon, lat, limit, false);
+//				}
 
 				// build geojson
 				final JSONObject collection = new JSONObject();

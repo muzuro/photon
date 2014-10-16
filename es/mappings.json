@@ -38,13 +38,6 @@
       "coordinate": {
         "type": "geo_point"
       },
-      "postcode": {
-        "type": "string",
-        "index": "no",
-        "copy_to": [
-          "collector.default"
-        ]
-      },
       "city": {
         "properties": {
           "de": {
