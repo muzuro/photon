@@ -1,8 +1,10 @@
 package de.komoot.photon.importer.model;
 
+import com.google.common.collect.Sets;
 import com.neovisionaries.i18n.CountryCode;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Point;
+
 import lombok.Data;
 
 import java.util.HashSet;
@@ -16,6 +18,7 @@ import java.util.Set;
  */
 @Data
 public class PhotonDoc {
+        private static final Set<String> IMPORTED_KEYS = Sets.newHashSet("place", "highway", "building");
 	final private long placeId;
 	final private String osmType;
 	final private long osmId;
@@ -38,6 +41,8 @@ public class PhotonDoc {
 	private Map<String, String> country;
 
 	public boolean isUsefulForIndex() {
+	        if(!IMPORTED_KEYS.contains(tagKey.toLowerCase())) return false;
+	        
 		if("place".equals(tagKey) && "houses".equals(tagValue)) return false;
 
 		if(houseNumber != null) return true;
